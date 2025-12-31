@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 project(libnyoravim LANGUAGES C)
 
+option(BUILD_SHARED_LIBS "Build shared libraries." ON)
+option(NV_BUILD_TESTS "Build tests." ON)
+
 if(BUILD_SHARED_LIBS)
     set(LIB_TYPE SHARED)
 else()
@@ -32,7 +35,7 @@ target_link_libraries(
 
 set_target_properties(
     nyoravim PROPERTIES
-    VERSION 1
+    VERSION 1.0.1
 )
 
 install(
@@ -53,4 +56,6 @@ install(
     DESTINATION "share/licenses/libnyoravim/"
 )
 
-add_subdirectory("tests")
+if(NV_BUILD_TESTS)
+    add_subdirectory("tests")
+endif()
