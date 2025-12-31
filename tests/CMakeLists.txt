@@ -7,7 +7,7 @@ foreach(SRC_FILE ${TEST_SRC})
     set(TEST_NAME nv_test_${TEST_SRC_NAME})
 
     add_executable(${TEST_NAME} ${SRC_FILE})
-    target_link_libraries(${TEST_NAME} nyoravim)
+    target_link_libraries(${TEST_NAME} libnyoravim)
 
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 endforeach()
