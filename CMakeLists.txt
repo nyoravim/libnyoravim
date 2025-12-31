@@ -10,17 +10,18 @@ endif()
 file(GLOB_RECURSE SRC CONFIGURE_DEPENDS "src/*.c")
 add_library(nyoravim ${LIB_TYPE} ${SRC})
 
-file(GLOB_RECURSE PUB_HEADERS CONFIGURE_DEPENDS "include/*.h")
+set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
+file(GLOB_RECURSE PUB_HEADERS CONFIGURE_DEPENDS "${INCLUDE_DIR}/*.h")
 target_sources(
     nyoravim PUBLIC
     FILE_SET HEADERS
-    BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    BASE_DIRS ${INCLUDE_DIR}
     FILES ${PUB_HEADERS}
 )
 
 target_include_directories(
     nyoravim PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${INCLUDE_DIR}>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
@@ -42,9 +43,14 @@ install(
 
 install(
     EXPORT libnyoravim
-    DESTINATION lib/cmake/libnyoravim
+    DESTINATION "lib/cmake/libnyoravim/"
     NAMESPACE libnyoravim
-    FILE libnyoravim-config.cmake
+    FILE "libnyoravim-config.cmake"
+)
+
+install(
+    FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE"
+    DESTINATION "share/licenses/libnyoravim/"
 )
 
 add_subdirectory("tests")
