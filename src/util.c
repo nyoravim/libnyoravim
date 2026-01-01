@@ -23,14 +23,14 @@ char* nv_strdup(const char* str) {
     }
 
     size_t len = strlen(str);
-    size_t size = (len + 1) * sizeof(char);
+    size_t size = len + 1;
 
-    char* dst = nv_alloc(size);
+    char* dst = nv_alloc(size * sizeof(char));
     if (!dst) {
         /* failed */
         return NULL;
     }
 
-    strncpy(dst, str, len);
+    strncpy(dst, str, size);
     return dst;
 }
