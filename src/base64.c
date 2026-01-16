@@ -93,7 +93,8 @@ static void encode_chunk(const uint8_t* src, size_t size, char* dst) {
             value |= src[i] >> ((i + 1) * 2);
         }
 
-        assert(to_base64(value, &dst[i]));
+        bool success = to_base64(value, &dst[i]);
+        assert(success);
     }
 }
 
