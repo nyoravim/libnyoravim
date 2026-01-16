@@ -35,7 +35,7 @@ target_link_libraries(
 
 set_target_properties(
     libnyoravim PROPERTIES
-    VERSION 1.0.5
+    VERSION 1.0.6
     OUTPUT_NAME "nyoravim"
 )
 
