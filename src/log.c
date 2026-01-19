@@ -22,9 +22,12 @@ static bool is_file_tty(FILE* file) {
 static char* format_timestamp(time_t timestamp) {
     struct tm* local = localtime(&timestamp);
 
+    int32_t year = local->tm_year + 1900;
+    int32_t month = local->tm_mon + 1;
+
     char buffer[256];
-    snprintf(buffer, sizeof(buffer), "%04d/%02d/%02d %02d:%02d:%02d", local->tm_year + 1900,
-             local->tm_mon, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
+    snprintf(buffer, sizeof(buffer), "%04d/%02d/%02d %02d:%02d:%02d", year, month, local->tm_mday,
+             local->tm_hour, local->tm_min, local->tm_sec);
 
     return nv_strdup(buffer);
 }
