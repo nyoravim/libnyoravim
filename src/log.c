@@ -147,4 +147,6 @@ void nv_log(const struct nv_logger* logger, uint32_t line, const char* file, uin
 
         sink->on_log(sink->user, &event);
     }
+
+    nv_free(buffer);
 }
