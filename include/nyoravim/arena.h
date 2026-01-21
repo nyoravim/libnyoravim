@@ -2,7 +2,6 @@
 #define _NV_ARENA_H
 
 #include <stddef.h>
-#include <stdint.h>
 
 typedef struct nv_arena nv_arena_t;
 
