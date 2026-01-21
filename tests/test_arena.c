@@ -38,8 +38,11 @@ int main(int argc, const char** argv) {
     strncpy(dst, src, src_len + 1);
     assert(strcmp(dst, strings[3]) == 0);
 
-    /* dont have to free */
-    nv_arena_destroy(arena);
+    nv_arena_free(arena, copies[2]);
+    nv_arena_free(arena, copies[1]);
+    nv_arena_free(arena, copies[3]);
+    nv_arena_free(arena, copies[0]);
 
+    nv_arena_destroy(arena);
     return 0;
 }

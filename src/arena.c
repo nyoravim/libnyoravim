@@ -214,6 +214,29 @@ void* nv_arena_alloc(nv_arena_t* arena, size_t size) {
     return (void*)alloc + sizeof(struct arena_allocation);
 }
 
+static bool recommit_block(nv_arena_t* arena, struct arena_allocation* alloc,
+                           size_t new_alloc_size) {
+    void* commit_begin = (void*)align_up_to_pow2((size_t)alloc + alloc->size, arena->pagesize);
+    void* commit_end = (void*)align_up_to_pow2((size_t)alloc + new_alloc_size, arena->pagesize);
+
+    if (alloc->next) {
+        void* next_commit_begin = (void*)align_down_to_pow2((size_t)alloc->next, arena->pagesize);
+        if (next_commit_begin < commit_end) {
+            commit_end = next_commit_begin;
+        }
+    }
+
+    if (commit_end > commit_begin) {
+        size_t commit_size = commit_end - commit_begin;
+        if (!commit_mem(commit_begin, commit_size)) {
+            /* failed to commit */
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void* nv_arena_realloc(nv_arena_t* arena, void* block, size_t size) {
     assert(arena);
     if (!block) {
@@ -236,24 +259,8 @@ void* nv_arena_realloc(nv_arena_t* arena, void* block, size_t size) {
     if (new_alloc_size <= alloc->size + available) {
         /* can extend allocation without moving */
 
-        void* commit_begin = (void*)align_up_to_pow2((size_t)alloc + alloc->size, arena->pagesize);
-        void* commit_end = (void*)align_up_to_pow2((size_t)alloc + new_alloc_size, arena->pagesize);
-
-        if (alloc->next) {
-            void* next_commit_begin =
-                (void*)align_down_to_pow2((size_t)alloc->next, arena->pagesize);
-
-            if (next_commit_begin < commit_end) {
-                commit_end = next_commit_begin;
-            }
-        }
-
-        if (commit_end > commit_begin) {
-            size_t commit_size = commit_end - commit_begin;
-            if (!commit_mem(commit_begin, commit_size)) {
-                /* failed to commit */
-                return NULL;
-            }
+        if (!recommit_block(arena, alloc, new_alloc_size)) {
+            return NULL;
         }
 
         alloc->size = new_alloc_size;
@@ -293,5 +300,26 @@ void nv_arena_free(nv_arena_t* arena, void* block) {
         alloc->next->previous = alloc->previous;
     }
 
-    /* todo: check to decommit */
+    void* commit_begin = (void*)align_down_to_pow2((size_t)alloc, arena->pagesize);
+    if (alloc->previous) {
+        void* prev_commit_end = (void*)align_up_to_pow2(
+            (size_t)alloc->previous + alloc->previous->size, arena->pagesize);
+
+        if (prev_commit_end > commit_begin) {
+            commit_begin = prev_commit_end;
+        }
+    }
+
+    void* commit_end = (void*)align_up_to_pow2((size_t)alloc + alloc->size, arena->pagesize);
+    if (alloc->next) {
+        void* next_commit_begin = (void*)align_down_to_pow2((size_t)alloc->next, arena->pagesize);
+        if (next_commit_begin < commit_end) {
+            commit_end = next_commit_begin;
+        }
+    }
+
+    if (commit_end > commit_begin) {
+        size_t commit_size = commit_end - commit_begin;
+        uncommit_mem(commit_begin, commit_size);
+    }
 }
