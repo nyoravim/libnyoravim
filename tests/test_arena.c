@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 
-int main(int argc, const char** argv) {
+static void arena_basic() {
     size_t arena_size = 1 * 1024 * 1024; /* 1 mb */
 
     nv_arena_t* arena = nv_arena_create(arena_size);
@@ -44,5 +44,36 @@ int main(int argc, const char** argv) {
     nv_arena_free(arena, copies[0]);
 
     nv_arena_destroy(arena);
+}
+
+static void arena_page_boundaries() {
+    size_t arena_size = 1 * 1024 * 1024; /* 1 mb */
+
+    nv_arena_t* arena = nv_arena_create(arena_size);
+    assert(arena);
+
+    /* first will be over pages 0 and 1
+     * second is over pages 1 and 2 */
+
+    size_t commit_size = nv_arena_get_commit_size(arena);
+    assert(commit_size > 0);
+
+    void* first = nv_arena_alloc(arena, commit_size);
+    void* second = nv_arena_alloc(arena, commit_size);
+    assert(first && second);
+
+    /* uncommits page 0 */
+    nv_arena_free(arena, first);
+
+    /* uncommits pages 1 and 2 */
+    nv_arena_free(arena, second);
+
+    nv_arena_destroy(arena);
+}
+
+int main(int argc, const char** argv) {
+    arena_basic();
+    arena_page_boundaries();
+
     return 0;
 }

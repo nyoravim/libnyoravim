@@ -98,6 +98,8 @@ void nv_arena_destroy(nv_arena_t* arena) {
     munmap(arena, arena->total_size);
 }
 
+size_t nv_arena_get_commit_size(const nv_arena_t* arena) { return arena->pagesize; }
+
 struct free_region {
     struct arena_allocation* previous;
     struct arena_allocation* next;
